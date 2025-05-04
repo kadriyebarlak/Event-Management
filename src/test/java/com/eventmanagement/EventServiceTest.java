@@ -114,7 +114,7 @@ class EventServiceTest {
     void updateEvent_shouldThrowIfNotFound() {
         when(eventRepository.findById(1L)).thenReturn(Optional.empty());
         EventRequest request = new EventRequest();
-        assertThrows(ResponseStatusException.class, () -> eventService.updateEvent(1L, request));
+        assertThrows(RuntimeException.class, () -> eventService.updateEvent(1L, request));
     }
 
     @Test

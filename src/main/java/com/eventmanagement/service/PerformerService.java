@@ -49,7 +49,7 @@ public class PerformerService {
     public Performer updatePerformer(Long id, PerformerRequest updatedPerformer) {
         Optional<Performer> existing = performerRepository.findById(id);
         if (existing.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Performer with id " + id + " not found.");
+            throw new RuntimeException("Performer with id " + id + " not found.");
         }
 
         Performer performer = existing.get();

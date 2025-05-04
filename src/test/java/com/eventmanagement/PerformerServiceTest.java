@@ -92,7 +92,7 @@ class PerformerServiceTest {
         PerformerRequest update = new PerformerRequest();
         update.setName("X");
 
-        assertThrows(ResponseStatusException.class, () -> performerService.updatePerformer(id, update));
+        assertThrows(RuntimeException.class, () -> performerService.updatePerformer(id, update));
     }
 
     @Test
