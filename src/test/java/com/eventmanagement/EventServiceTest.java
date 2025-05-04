@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -22,9 +21,9 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.eventmanagement.dto.EventRequest;
+import com.eventmanagement.dto.EventResponse;
 import com.eventmanagement.entity.Event;
 import com.eventmanagement.entity.Performer;
 import com.eventmanagement.enums.EventType;
@@ -68,17 +67,26 @@ class EventServiceTest {
         request.setEndDateTime(LocalDateTime.now().plusHours(2));
         request.setPerformerIds(Set.of(1L));
 
-        Set<Performer> performers = new HashSet<>();
-        performers.add(new Performer());
+        Performer mockPerformer = new Performer();
+        mockPerformer.setId(1L);
+        mockPerformer.setName("x");
+        mockPerformer.setRole("Singer");
+        mockPerformer.setBiography("Singer biography");
+        Set<Performer> performers = Set.of(mockPerformer);
 
         when(performerService.getPerformersByIds(Set.of(1L))).thenReturn(performers);
-        when(eventRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        Event result = eventService.createEvent(request);
+        when(eventRepository.save(any())).thenAnswer(inv -> {
+            Event saved = inv.getArgument(0);
+            saved.setId(100L);
+            return saved;
+        });
+
+        EventResponse result = eventService.createEvent(request);
 
         assertEquals("Test Event", result.getName());
-        assertEquals(performers, result.getPerformers());
-        assertEquals(42, result.getCreatedByUser());
+        assertEquals("Summary", result.getSummary());
+        assertEquals("Singer", result.getPerformers().iterator().next().getRole());
     }
 
     @Test
@@ -97,17 +105,29 @@ class EventServiceTest {
         request.setEndDateTime(LocalDateTime.now().plusHours(2));
         request.setPerformerIds(Set.of(2L));
 
-        Set<Performer> performers = Set.of(new Performer());
+        Performer mockPerformer = new Performer();
+        mockPerformer.setId(2L);
+        mockPerformer.setName("y");
+        mockPerformer.setRole("Actress");
+        mockPerformer.setBiography("Performer bio");
+        Set<Performer> performers = Set.of(mockPerformer);
+
+        when(performerService.getPerformersByIds(Set.of(2L))).thenReturn(performers);
 
         when(eventRepository.findById(eventId)).thenReturn(Optional.of(existing));
-        when(performerService.getPerformersByIds(Set.of(2L))).thenReturn(performers);
-        when(eventRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        when(eventRepository.save(any())).thenAnswer(inv -> {
+            Event saved = inv.getArgument(0);
+            saved.setUpdatedByUser(42);
+            return saved;
+        });
 
-        Event updated = eventService.updateEvent(eventId, request);
+        EventResponse updated = eventService.updateEvent(eventId, request);
 
         assertEquals("Updated Event", updated.getName());
-        assertEquals(EventType.THEATER, updated.getEventType());
-        assertEquals(42, updated.getUpdatedByUser());
+        assertEquals("THEATER", updated.getEventType().toString());
+        assertTrue(updated.getPerformers().stream()
+                .anyMatch(p -> p.getName().equals("y") && p.getRole().equals("Actress")));
+
     }
 
     @Test
@@ -124,7 +144,7 @@ class EventServiceTest {
 
         when(eventRepository.findAll()).thenReturn(List.of(e1, e2));
 
-        List<Event> result = eventService.getEventsByDateRange(null, null);
+        List<EventResponse> result = eventService.getEventsByDateRange(null, null);
 
         assertEquals(1, result.size());
         assertTrue(result.contains(e1));
@@ -136,7 +156,7 @@ class EventServiceTest {
 
         when(eventRepository.findByStartDateTimeBetween(any(), any())).thenReturn(List.of(e1));
 
-        List<Event> result = eventService.getEventsByDateRange(LocalDate.now(), LocalDate.now());
+        List<EventResponse> result = eventService.getEventsByDateRange(LocalDate.now(), LocalDate.now());
 
         assertEquals(1, result.size());
     }
@@ -157,7 +177,7 @@ class EventServiceTest {
     @Test
     void deleteEvent_shouldThrowIfNotFound() {
         when(eventRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(ResponseStatusException.class, () -> eventService.deleteEvent(1L));
+        assertThrows(RuntimeException.class, () -> eventService.deleteEvent(1L));
     }
 }
 

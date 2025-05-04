@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.eventmanagement.dto.PerformerRequest;
+import com.eventmanagement.dto.PerformerResponse;
 import com.eventmanagement.entity.Performer;
 import com.eventmanagement.service.PerformerService;
 
@@ -34,26 +35,26 @@ public class PerformerController {
     }
 
     @PostMapping
-    public ResponseEntity<Performer> createPerformer(@RequestBody @Valid PerformerRequest performer) {
+    public ResponseEntity<PerformerResponse> createPerformer(@RequestBody @Valid PerformerRequest performer) {
         log.info("Creating performer: {}", performer.getName());
-        Performer response = performerService.createPerformer(performer);
+        PerformerResponse response = performerService.createPerformer(performer);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Performer> updatePerformer(@PathVariable Long id, @RequestBody @Valid PerformerRequest performer) {
+    public ResponseEntity<PerformerResponse> updatePerformer(@PathVariable Long id, @RequestBody @Valid PerformerRequest performer) {
         log.info("Updating performer id {}: {}", id, performer.getName());
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("Performer ID is required");
         }
-        Performer response = performerService.updatePerformer(id, performer);
+        PerformerResponse response = performerService.updatePerformer(id, performer);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping
-    public ResponseEntity<List<Performer>> listPerformers() {
+    public ResponseEntity<List<PerformerResponse>> listPerformers() {
         log.info("Listing all performers");
-        List<Performer> response = performerService.getAllPerformers();
+        List<PerformerResponse> response = performerService.getAllPerformers();
         return ResponseEntity.ok(response);
     }
 

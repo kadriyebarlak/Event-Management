@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.eventmanagement.dto.EventRequest;
-import com.eventmanagement.entity.Event;
+import com.eventmanagement.dto.EventResponse;
 import com.eventmanagement.service.EventService;
 
 import jakarta.validation.Valid;
@@ -42,28 +42,28 @@ public class EventController {
     }
 
     @PostMapping
-    public ResponseEntity<Event> createEvent(@RequestBody @Valid EventRequest request) {
+    public ResponseEntity<EventResponse> createEvent(@RequestBody @Valid EventRequest request) {
     	log.info("Creating event: {}", request.getName());
-    	Event response = eventService.createEvent(request);
+    	EventResponse response = eventService.createEvent(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Event> updateEvent(@PathVariable Long id, @RequestBody @Valid EventRequest request) {
+    public ResponseEntity<EventResponse> updateEvent(@PathVariable Long id, @RequestBody @Valid EventRequest request) {
     	log.info("Updating event id {}: {}", id, request.getName());
     	if (id == null || id <= 0) {
             throw new IllegalArgumentException("Event ID is required");
         }
-    	Event response = eventService.updateEvent(id, request);
+    	EventResponse response = eventService.updateEvent(id, request);
         return ResponseEntity.ok(response);
     }
     
     @GetMapping
-    public ResponseEntity<List<Event>> getEventsByDateRange(
+    public ResponseEntity<List<EventResponse>> getEventsByDateRange(
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy.MM.dd") LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy.MM.dd") LocalDate endDate) {
     	log.info("Retrieving events from {} to {}", startDate, endDate);
-    	List<Event> events = eventService.getEventsByDateRange(startDate, endDate);
+    	List<EventResponse> events = eventService.getEventsByDateRange(startDate, endDate);
     	return ResponseEntity.ok(events);
     }
     

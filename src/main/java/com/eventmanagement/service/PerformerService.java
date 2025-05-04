@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.eventmanagement.dto.PerformerRequest;
+import com.eventmanagement.dto.PerformerResponse;
 import com.eventmanagement.entity.Performer;
 import com.eventmanagement.repository.PerformerRepository;
 
@@ -34,7 +35,7 @@ public class PerformerService {
         return performerRepository.findAllById(performerIds).stream().collect(Collectors.toSet());
     }
     
-    public Performer createPerformer(PerformerRequest request) {
+    public PerformerResponse createPerformer(PerformerRequest request) {
     	log.info("Saving new performer");
     	Performer performer = new Performer();
     	performer.setName(request.getName());
@@ -43,10 +44,10 @@ public class PerformerService {
         
     	performer = performerRepository.save(performer);
         log.info("Saved new performer id {}", performer.getId());
-		return performer;
+		return new PerformerResponse(performer.getId(), performer.getName(), performer.getRole(), performer.getBiography());
     }
 
-    public Performer updatePerformer(Long id, PerformerRequest updatedPerformer) {
+    public PerformerResponse updatePerformer(Long id, PerformerRequest updatedPerformer) {
         Optional<Performer> existing = performerRepository.findById(id);
         if (existing.isEmpty()) {
             throw new RuntimeException("Performer with id " + id + " not found.");
@@ -57,11 +58,14 @@ public class PerformerService {
         performer.setRole(updatedPerformer.getRole());
         performer.setBiography(updatedPerformer.getBiography());
 
-        return performerRepository.save(performer);
+        performer = performerRepository.save(performer);
+        return new PerformerResponse(performer.getId(), performer.getName(), performer.getRole(), performer.getBiography());
     }
 
-    public List<Performer> getAllPerformers() {
-        return performerRepository.findAll();
+    public List<PerformerResponse> getAllPerformers() {
+    	return performerRepository.findAll().stream()
+                .map(p -> new PerformerResponse(p.getId(), p.getName(), p.getRole(), p.getBiography()))
+                .collect(Collectors.toList());
     }
 
     public void deletePerformer(Long id) {

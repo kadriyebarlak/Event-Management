@@ -23,6 +23,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.eventmanagement.dto.PerformerRequest;
+import com.eventmanagement.dto.PerformerResponse;
 import com.eventmanagement.entity.Performer;
 import com.eventmanagement.repository.PerformerRepository;
 import com.eventmanagement.service.PerformerService;
@@ -55,7 +56,7 @@ class PerformerServiceTest {
 
         when(performerRepository.save(any())).thenReturn(savedPerformer);
 
-        Performer result = performerService.createPerformer(request);
+        PerformerResponse result = performerService.createPerformer(request);
 
         assertEquals("The Weeknd", result.getName());
         assertEquals("Singer", result.getRole());
@@ -77,7 +78,7 @@ class PerformerServiceTest {
         when(performerRepository.findById(id)).thenReturn(Optional.of(existing));
         when(performerRepository.save(any())).thenReturn(existing);
 
-        Performer result = performerService.updatePerformer(id, update);
+        PerformerResponse result = performerService.updatePerformer(id, update);
 
         assertEquals("New Name", result.getName());
         assertEquals("Guitarist", result.getRole());
@@ -101,7 +102,7 @@ class PerformerServiceTest {
         performer.setName("Someone");
         when(performerRepository.findAll()).thenReturn(Arrays.asList(performer));
 
-        List<Performer> list = performerService.getAllPerformers();
+        List<PerformerResponse> list = performerService.getAllPerformers();
         assertEquals(1, list.size());
         assertEquals("Someone", list.get(0).getName());
     }
