@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,29 +34,33 @@ public class PerformerController {
     }
 
     @PostMapping
-    public Performer createPerformer(@RequestBody @Valid PerformerRequest performer) {
+    public ResponseEntity<Performer> createPerformer(@RequestBody @Valid PerformerRequest performer) {
         log.info("Creating performer: {}", performer.getName());
-        return performerService.createPerformer(performer);
+        Performer response = performerService.createPerformer(performer);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/{id}")
-    public Performer updatePerformer(@PathVariable Long id, @RequestBody @Valid PerformerRequest performer) {
+    public ResponseEntity<Performer> updatePerformer(@PathVariable Long id, @RequestBody @Valid PerformerRequest performer) {
         log.info("Updating performer id {}: {}", id, performer.getName());
-        if (performer.getId() == null || performer.getId() <= 0) {
+        if (id == null || id <= 0) {
             throw new IllegalArgumentException("Performer ID is required");
         }
-        return performerService.updatePerformer(id, performer);
+        Performer response = performerService.updatePerformer(id, performer);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
-    public List<Performer> listPerformers() {
+    public ResponseEntity<List<Performer>> listPerformers() {
         log.info("Listing all performers");
-        return performerService.getAllPerformers();
+        List<Performer> response = performerService.getAllPerformers();
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
-    public void deletePerformer(@PathVariable Long id) {
+    public ResponseEntity<String> deletePerformer(@PathVariable Long id) {
         log.info("Deleting performer with id {}", id);
         performerService.deletePerformer(id);
+        return ResponseEntity.ok("Performer deleted successfully");
     }
 }

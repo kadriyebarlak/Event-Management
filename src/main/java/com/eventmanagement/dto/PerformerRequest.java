@@ -7,8 +7,6 @@ import lombok.Setter;
 @Getter @Setter
 public class PerformerRequest {
 	
-	private Long id;
-
 	@NotBlank(message = "Name is required")
     private String name;
 	

@@ -1,5 +1,6 @@
 package com.eventmanagement.controller;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,8 +19,9 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestParam Long userId) {
+    public ResponseEntity<String> login(@RequestParam Long userId) {
         //TODO: check username/password
-        return jwtUtil.generateToken(userId);
+        String response = jwtUtil.generateToken(userId);
+        return ResponseEntity.ok(response);
     }
 }

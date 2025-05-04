@@ -57,7 +57,7 @@ public class EventService {
     public Event updateEvent(Long id, EventRequest request) {
     	log.info("Finding and updating event id {}", id);
         Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event with id " + id + " not found."));
+                .orElseThrow(() -> new RuntimeException("Event with id " + id + " not found."));
 
         event.setName(request.getName());
         event.setSummary(request.getSummary());

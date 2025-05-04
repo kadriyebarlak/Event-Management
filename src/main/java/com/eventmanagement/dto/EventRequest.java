@@ -14,8 +14,6 @@ import lombok.Setter;
 @Getter @Setter
 public class EventRequest {
 	
-	private Long eventId;
-	
 	@NotBlank(message = "Name is required")
     private String name;
 

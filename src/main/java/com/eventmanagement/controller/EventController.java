@@ -6,6 +6,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,32 +42,36 @@ public class EventController {
     }
 
     @PostMapping
-    public Event createEvent(@RequestBody @Valid EventRequest request) {
+    public ResponseEntity<Event> createEvent(@RequestBody @Valid EventRequest request) {
     	log.info("Creating event: {}", request.getName());
-        return eventService.createEvent(request);
+    	Event response = eventService.createEvent(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/{id}")
-    public Event updateEvent(@PathVariable Long id, @RequestBody @Valid EventRequest request) {
+    public ResponseEntity<Event> updateEvent(@PathVariable Long id, @RequestBody @Valid EventRequest request) {
     	log.info("Updating event id {}: {}", id, request.getName());
-    	if (request.getEventId() == null || request.getEventId() <= 0) {
+    	if (id == null || id <= 0) {
             throw new IllegalArgumentException("Event ID is required");
         }
-        return eventService.updateEvent(id, request);
+    	Event response = eventService.updateEvent(id, request);
+        return ResponseEntity.ok(response);
     }
     
     @GetMapping
-    public List<Event> getEventsByDateRange(
+    public ResponseEntity<List<Event>> getEventsByDateRange(
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy.MM.dd") LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy.MM.dd") LocalDate endDate) {
     	log.info("Retrieving events from {} to {}", startDate, endDate);
-    	return eventService.getEventsByDateRange(startDate, endDate);
+    	List<Event> events = eventService.getEventsByDateRange(startDate, endDate);
+    	return ResponseEntity.ok(events);
     }
     
     @DeleteMapping("/{id}")
-    public void deleteEvent(@PathVariable Long id) {
+    public ResponseEntity<String> deleteEvent(@PathVariable Long id) {
     	log.info("Deleting event with id {}", id);
         eventService.deleteEvent(id);
+        return ResponseEntity.ok("Event deleted successfully");
     }
 
 }
