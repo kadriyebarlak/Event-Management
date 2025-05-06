@@ -19,6 +19,7 @@ import com.eventmanagement.dto.EventResponse;
 import com.eventmanagement.dto.PerformerResponse;
 import com.eventmanagement.entity.Event;
 import com.eventmanagement.entity.Performer;
+import com.eventmanagement.messaging.EventPublisher;
 import com.eventmanagement.repository.EventRepository;
 
 @Service
@@ -28,10 +29,13 @@ public class EventService {
 
 	private final EventRepository eventRepository;
 	private final PerformerService performerService;
+	private final EventPublisher eventPublisher;
 
-	public EventService(EventRepository eventRepository, PerformerService performerService) {
+
+	public EventService(EventRepository eventRepository, PerformerService performerService, EventPublisher eventPublisher) {
 		this.eventRepository = eventRepository;
 		this.performerService = performerService;
+		this.eventPublisher = eventPublisher;
 	}
 
 	public EventResponse createEvent(EventRequest request) {
@@ -55,7 +59,10 @@ public class EventService {
 
 		event = eventRepository.save(event);
 		log.info("Saved new event id {}", event.getId());
-		return toEventResponse(event);
+		
+		EventResponse response = toEventResponse(event);
+		eventPublisher.publishEventCreated(response);
+		return response;
 	}
 
 	public EventResponse updateEvent(Long id, EventRequest request) {

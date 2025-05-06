@@ -1,5 +1,6 @@
 package com.eventmanagement.dto;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -7,8 +8,9 @@ import com.eventmanagement.enums.EventType;
 
 import lombok.Getter;
 
+@SuppressWarnings("serial")
 @Getter
-public class EventResponse {
+public class EventResponse implements Serializable {
 	
 	private Long id;
     private EventType eventType;

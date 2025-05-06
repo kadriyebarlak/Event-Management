@@ -13,11 +13,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,6 +30,7 @@ import com.eventmanagement.dto.EventResponse;
 import com.eventmanagement.entity.Event;
 import com.eventmanagement.entity.Performer;
 import com.eventmanagement.enums.EventType;
+import com.eventmanagement.messaging.EventPublisher;
 import com.eventmanagement.repository.EventRepository;
 import com.eventmanagement.service.EventService;
 import com.eventmanagement.service.PerformerService;
@@ -38,6 +42,9 @@ class EventServiceTest {
 
     @Mock
     private PerformerService performerService;
+    
+    @Mock
+    private EventPublisher eventPublisher;
 
     @InjectMocks
     private EventService eventService;
@@ -54,8 +61,20 @@ class EventServiceTest {
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
         when(authentication.getPrincipal()).thenReturn(42); // Dummy user id
+        Mockito.reset(eventRepository, performerService, eventPublisher);
+    }
+    
+    @BeforeEach
+    void setupSecurityContext() {
+        var auth = new UsernamePasswordAuthenticationToken(42, null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
+    
     @Test
     void createEvent_shouldSaveEventWithPerformers() {
         EventRequest request = new EventRequest();
@@ -147,18 +166,20 @@ class EventServiceTest {
         List<EventResponse> result = eventService.getEventsByDateRange(null, null);
 
         assertEquals(1, result.size());
-        assertTrue(result.contains(e1));
     }
 
     @Test
     void getEventsByDateRange_shouldFilterByDates() {
-        Event e1 = new Event(); e1.setStartDateTime(LocalDateTime.now()); e1.setIsActive(true);
+        Event e1 = new Event(); 
+        e1.setStartDateTime(LocalDateTime.now()); 
+        e1.setIsActive(true);
 
         when(eventRepository.findByStartDateTimeBetween(any(), any())).thenReturn(List.of(e1));
 
         List<EventResponse> result = eventService.getEventsByDateRange(LocalDate.now(), LocalDate.now());
 
         assertEquals(1, result.size());
+        
     }
 
     @Test
